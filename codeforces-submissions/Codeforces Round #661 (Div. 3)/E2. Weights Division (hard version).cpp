@@ -1,0 +1,427 @@
+/*      ###########################
+        #  Author : Pranay Garg   #
+        #  College : SGSITS       #
+        ###########################
+*/
+# include   <bits/stdc++.h>
+# include   <ext/pb_ds/assoc_container.hpp>
+# define    ll                  long long int
+# define    ull                 unsigned long long int
+# define    ironman             ios_base::sync_with_stdio(false);cin.tie(NULL);
+# define    MOD                 1000000007
+# define    MODT                998244353
+# define    endl                '\n'
+# define    INF                 9e18
+# define    PI                  3.14159265358979323846
+# define    mp                  make_pair
+# define    fi                  first
+# define    se                  second
+# define    vi                  std::vector<ll>
+# define    vii(a)              std::vector<a>
+# define    pb                  push_back
+# define    pi                  pair<ll,ll>
+# define    fo(i,a,b)           for(ll i=a;i<b;i++)
+# define    all(a)              a.begin(), a.end()
+# define    allr(a)             a.rbegin(), a.rend()
+# define    alla(a,n)           a,a+n
+# define    debug1(x)           cout<<#x<<" "<<x<<endl;
+# define    debug2(x,y)         cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<endl;
+# define    debug3(x,y,z)       cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<endl;
+# define    debug4(x,y,z,w)     cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#w <<" "<<w<<endl;
+# define    debug5(x,y,z,w,v)   cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#w <<" "<<w<<" "<<#v <<" "<<v<<endl;
+# define    debug6(x,y,z,w,a,b) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#w <<" "<<w<<" "<<#a<<" "<<a<<" "<<#b<<" "<<b<<endl;
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<int, null_type, less<int>, rb_tree_tag,
+        tree_order_statistics_node_update> indexed_set;
+
+template<class T> T max(T a, T b, T c) {
+    return max(a, max(b, c));
+}
+template<class T> T min(T a, T b, T c) {
+    return min(a, min(b, c));
+}
+
+void fastio()
+{
+    ironman
+#ifndef ONLINE_JUDGE
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+    freopen("error.txt", "w", stderr);
+#endif
+}
+
+ll prime[100005];
+void SieveOfEratosthenes(ll n)//O(nloglogn)
+{
+    for (ll i = 2; i <= n; i++) prime[i] = 1;
+
+    for (ll p = 2; p * p <= n; p++)
+    {
+        if (prime[p] == 1)
+        {
+            for (ll i = p * p; i <= n; i += p)
+                prime[i] = 0;
+        }
+    }
+    for (ll i = 2; i <= n; i++)
+        prime[i] += prime[i - 1];
+}
+bool isPrime(ll n)//O(sqrt(n))
+{
+    if (n < 2)
+        return false;
+    for (ll i = 2; i * i <= n; i++)
+        if (n % i == 0)
+            return false;
+    return true;
+}
+std::vector<ll> generatePrimeFactors(ll n)
+{
+    std::vector<ll> prime;
+    for (ll i = 2; i * i <= n; i++)
+    {
+        if (n % i == 0)
+        {
+            prime.pb(i);
+            while (n % i == 0)
+                n = n / i;
+        }
+    }
+    if (n != 1)
+        prime.pb(n);
+    return prime;
+}
+std::vector<ll> generateFactors(ll n)
+{
+    std::vector<ll> fact;
+    for (ll i = 2; i * i <= n; i++)
+    {
+        if (n % i == 0)
+        {
+            fact.pb(i);
+            if (n / i != i)
+                fact.pb(n / i);
+            //24 - 1,2,3,4,6,8,12
+        }
+    }
+//    fact.pb(1);
+    if (n != 1)
+        fact.pb(n);
+    sort(fact.begin(), fact.end());
+    return fact;
+}
+
+ll extendedGCD(ll a, ll b, ll &x, ll &y)
+{
+    //produces correct results for negative integers as well
+    if (a == 0)
+    {
+        x = 0;
+        y = 1;
+        return b;
+    }
+    ll x1, y1, d;
+    d = extendedGCD(b % a, a, x1, y1);
+    x = y1 - (b / a) * x1;
+    y = x1;
+    return d;
+}
+ll gcd(ll a, ll b) //O(log min(a,b))
+{
+    /*
+    recursive implementation below
+    if(!b) return a;
+    return gcd(b,a%b);
+    */
+
+    //non-recursive implementation below
+    while (b)
+    {
+        a %= b;
+        swap(a, b);
+    }
+    return a;
+}
+
+ll multiply(ll a, ll b, ll m);
+ll singlemod(ll a, ll m);
+ll modpow(ll x, ll n, ll m) //O(logn)// used for calculating (x^n)%m
+{
+    if (n == 0)
+        return 1;
+    ll res = 1;
+    while (n)
+    {
+        if (n % 2)
+            res = multiply(res, x, m);
+        x = multiply(x, x, m);
+        n = n >> 1;
+    }
+    return singlemod(res, m);
+}
+ll fastpow(ll x, ll n)
+{
+    if (n == 0)
+        return 1;
+    ll res = 1;
+    while (n)
+    {
+        if (n % 2)
+            res = res * x;
+        x = x * x;
+        n = n >> 1;
+    }
+    return res;
+}
+ll modinverse(ll x, ll m) //O(logn)
+{
+    return modpow(x, m - 2, m);
+}
+ll add(ll a, ll b, ll m)
+{
+    return (((a % m) + (b % m)) % m);
+}
+ll substract(ll a, ll b, ll m)
+{
+//    if (a < b)
+//        swap(a, b);
+    return (((a % m) - (b % m) + m) % m);
+}
+ll multiply(ll a, ll b, ll m)
+{
+    // if (a > b) swap(a, b);
+    // ll ans = 0;
+    // while (a)
+    // {
+    //     if (a % 2)
+    //         ans = add(ans, b, m);
+    //     b = add(b, b, m);
+    //     a = a >> 1;
+    // }
+    // return (ans % m);
+    return (((a % m) * (b % m)) % m);
+}
+ll divide(ll a, ll b, ll m)
+{
+    ll temp = modinverse(b, m);
+    return multiply(a, temp, m);
+}
+ll singlemod(ll a, ll m)
+{
+    return (a % m);
+}
+ll eulerstotientfunction(ll n)//O(sqrt(n))
+{
+    ll ans = n;
+    for (ll i = 2; i * i <= n; i++)
+    {
+        if (n % i == 0)
+        {
+            while (n % i == 0)
+                n = n / i;
+            ans -= ans / i;
+        }
+    }
+    if (n > 1)
+        ans -= ans / n;
+    return ans;
+}
+
+ll ncr(ll n, ll k, ll m)
+{
+    if (k > n) return 0;
+    if (m == 0)
+    {
+        ll res = 1;
+        k = min(k, n - k);
+        for (ll i = 1; i <= k; i++)
+        {
+            res *= (n - i + 1);
+            res /= i;
+        }
+        return res;
+    }
+    else
+    {
+        ll res = 1;
+        k = min(k, n - k);
+        for (ll i = 1; i <= k; i++)
+        {
+            res = multiply(res, n - i + 1, m);
+            res = divide(res, i, m);
+        }
+        return singlemod(res, m);
+    }
+}
+ll kadaneAlgo(const std::vector<ll> &arr)
+{
+    ll size = arr.size();
+    ll currmax = arr[0], maxsofar = arr[0];
+    for (ll i = 1; i < size; i++)
+    {
+        //debug2(currmax,maxsofar);
+        currmax = max(arr[i], currmax + arr[i]);
+        maxsofar = max(maxsofar, currmax);
+    }
+    return maxsofar;
+}
+ll getDigitSum(ll n)
+{
+    ll co = 0;
+    while (n > 0)
+    {
+        co += n % 10;
+        n = n / 10;
+    }
+    return co;
+}
+
+template<class T>
+void printVector(const std::vector<T> arr)
+{
+    for (auto i : arr)
+        cout << i << " ";
+    cout << endl;
+}
+template<class T>
+void printArray(T arr[], ll n)
+{
+    for (ll i = 0; i < n; i++)
+        cout << arr[i] << " ";
+    cout << endl;
+}
+//const int p1 = 13331,m1 = 1e9+9,p2 = 7919, m2 = 1e9+9;
+//const int p1 = 97266353,m1 = 972663749,p2 = 97336357, m2 = 1000000007;
+//const int p1 = 31 ,m1 = 1e9+7;
+
+//grid cells
+//D U R L
+//ll dx[] = {1, -1, 0, 0};
+//ll dy[] = {0, 0, 1, -1};
+
+//---------------TEMPLATE ABOVE--------------//
+struct node
+{
+    ll u, w, c;
+    node(ll a, ll e, ll d)
+    {
+        u = a;
+        w = e;
+        c = d;
+    }
+};
+ll n, s;
+const int maxn = 1e5 + 5;
+vii(node) graph[maxn];
+ll sz[maxn];
+priority_queue<tuple<ll, ll, ll> > pq[2]; // diff,weight,size
+ll sum = 0;
+void dfs(ll node, ll par, ll w, ll c)
+{
+    bool lf = 1;
+    sz[node] = 0;
+    for (auto i : graph[node])
+    {
+        if (i.u != par)
+        {
+            lf = 0;
+            dfs(i.u, node, i.w, i.c);
+            sz[node] += sz[i.u];
+        }
+    }
+    if (lf) sz[node] = 1;
+    ll curr = w * sz[node];
+    sum += curr;
+    if (curr > 0)
+        pq[c].push({curr - (w / 2)*sz[node], w, sz[node]});
+}
+vi util(ll c)
+{
+    ll temp = sum - s;
+    vi f;
+    f.pb(0);
+    while (temp && !pq[c].empty())
+    {
+        tuple<ll, ll, ll> a = pq[c].top();
+        pq[c].pop();
+        temp -= get<0>(a);
+        f.pb(get<0>(a));
+        get<1>(a) /= 2;
+        get<0>(a) = get<1>(a) * get<2>(a) - (get<1>(a) / 2) * get<2>(a);
+        if (get<0>(a))
+            pq[c].push(a);
+    }
+    return f;
+}
+void solve()
+{
+    cin >> n >> s;
+
+    for (ll i = 0; i < n; i++) graph[i].clear();
+    while (!pq[0].empty()) pq[0].pop();
+    while (!pq[1].empty()) pq[1].pop();
+    sum = 0;
+
+    for (ll i = 1; i < n; i++)
+    {
+        ll u, v, w, c;
+        cin >> u >> v >> w >> c;
+        u--; v--; c--;
+        graph[u].pb(node(v, w, c));
+        graph[v].pb(node(u, w, c));
+    }
+
+    dfs(0, -1, 0, 0);
+    if (sum <= s)
+    {
+        cout << 0 << endl;
+        return;
+    }
+
+    ll ans = INT_MAX;
+    vi f1 = util(0), f2 = util(1);
+    for (ll i = 1; i < f1.size(); i++) f1[i] += f1[i - 1];
+    for (ll i = 1; i < f2.size(); i++) f2[i] += f2[i - 1];
+    // printVector(f1);
+    // printVector(f2);
+    sum -= s;
+//    cout << sum << endl;
+    for (ll i = 0; i < f1.size(); i++)
+    {
+        ll temp = f1[i];
+        ll req = sum - temp;
+        ll s = 0, e = f2.size() - 1, ind = 0;
+        while (s <= e)
+        {
+            ll m = s + (e - s) / 2;
+            if (f2[m] < req)
+                s = m + 1;
+            else
+            {
+                ind = m;
+                e = m - 1;
+            }
+        }
+        ll curr = i + (ind) * 2;
+//        debug2(i, ind);
+        if (f1[i] + f2[ind] >= sum)
+            ans = min(ans, curr);
+    }
+    cout << ans << endl;
+}
+int main()
+{
+    fastio();
+    ll t = 1;
+    cin >> t;
+    ll cases = t;
+    while (t--)
+    {
+        // cout << "Case #" << cases-t << ": ";
+        solve();
+    }
+}
